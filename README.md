@@ -1,4 +1,4 @@
-# <div align="center">G04 :DynoDroid</div>
+# <div align="center">G04 : DynoDroid</div>
 
 ---
 
