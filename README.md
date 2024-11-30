@@ -43,4 +43,6 @@ Our system not only identifies harmful behavior but also provides a detailed rep
 
 4. **Actionable Feedback:**
    - Users can review malicious indicators and take appropriate actions.
+  
+### Development Status : the current stage of deveopment can be monitored through [Activity_log](https://github.com/Recurse-Official/G04/blob/main/Activity_log.md)
 
