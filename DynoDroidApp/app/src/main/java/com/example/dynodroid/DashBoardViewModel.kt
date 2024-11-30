@@ -25,28 +25,43 @@ class DashBoardViewModel : ViewModel() {
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
-
     fun scanAndSendApk(appName: String, packageName: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _uploadState.value = UploadState.InProgress("Preparing APK files...")
                 val apkFiles = getApkFilesForPackage(packageName, context)
-                if (apkFiles.isNotEmpty()) {
-                    var uploadedSize = 0L
-                    val totalSize = apkFiles.sumOf { it.length() }
-                    apkFiles.forEach { file ->
+
+                if (apkFiles.isEmpty()) {
+                    _uploadState.value = UploadState.Failed("No APK files found for $packageName")
+                    return@launch
+                }
+
+                var uploadedSize = 0L
+                val totalSize = apkFiles.sumOf { it.length() }
+
+                apkFiles.forEach { file ->
+                    try {
                         uploadLargeApk(file, appName, packageName) { chunkSize ->
                             uploadedSize += chunkSize
                             val progress = ((uploadedSize.toFloat() / totalSize) * 100).toInt()
                             _uploadState.value = UploadState.InProgress("Uploading: $progress%")
                         }
+                    } catch (e: Exception) {
+                        _uploadState.value = UploadState.Failed("Error uploading file: ${e.message}")
+                        throw e
                     }
-                    _uploadState.value = UploadState.Success("Upload completed for $appName")
-                } else {
-                    _uploadState.value = UploadState.Failed("No APK files found for $packageName")
                 }
+
+                _uploadState.value = UploadState.Success("Upload completed for $appName")
+
+            } catch (e: PackageManager.NameNotFoundException) {
+                _uploadState.value = UploadState.Failed("Package not found: $packageName")
+            } catch (e: SecurityException) {
+                _uploadState.value = UploadState.Failed("Permission denied")
+            } catch (e: IOException) {
+                _uploadState.value = UploadState.Failed("Network or file error: ${e.message}")
             } catch (e: Exception) {
-                _uploadState.value = UploadState.Failed("Error: ${e.message}")
+                _uploadState.value = UploadState.Failed("Unexpected error: ${e.message}")
             }
         }
     }
@@ -88,14 +103,14 @@ class DashBoardViewModel : ViewModel() {
         val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA)
         val apkFiles = mutableListOf<File>()
 
-        // Safe call on sourceDir
         packageInfo.applicationInfo?.sourceDir?.let {
             apkFiles.add(File(it))
         }
 
-        // Safe call on splitSourceDirs
-        packageInfo.applicationInfo?.splitSourceDirs?.forEach { splitPath ->
-            apkFiles.add(File(splitPath))
+        packageInfo.applicationInfo?.splitSourceDirs?.let { splitDirs ->
+            splitDirs.forEach { splitPath ->
+                apkFiles.add(File(splitPath))
+            }
         }
 
         return apkFiles
