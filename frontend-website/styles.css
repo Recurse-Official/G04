@@ -11,21 +11,21 @@ body {
 }
 
 /* Navbar */
-.navbar {
+.navbar  {
     width: 100%;
     background-color: transparent; /* Transparent background */
     position: sticky;
-    top: 0;
+    top: 40px;
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 30px; /* Horizontal padding */
+    padding: 10px 40px; /* Horizontal padding */
 }
 
 .navbar-brand {
     flex-grow: 1; /* Makes the brand move to the left */
-    padding-left: 30px; /* Padding of 30px towards the left side */
+    padding-left: 60px; /* Padding of 30px towards the left side */
 }
 
 .navbar-brand a.dynodroid {
@@ -40,6 +40,7 @@ body {
     color: #ffffff; /* White on hover */
     text-decoration: none; /* No underline on hover */
 }
+
 
 .navbar-links {
     display: flex;
@@ -151,8 +152,8 @@ body {
 }
 
 .dropzone {
-    margin: 20px auto;
-    padding: 20px;
+    margin: 80px auto;
+    padding: 40px;
     border: 2px dashed #94a3b8; /* Light gray-blue */
     border-radius: 10px;
     color: #cbd5e1; /* Softer blue for text */
@@ -260,91 +261,81 @@ canvas {
     z-index: 9999;
     pointer-events: none; /* Prevent interaction with the icons */
 }
+.moving-icons {
+    position: absolute;
+    top: 0; /* Ensures the icons are placed relative to the page's top */
+    left: 0; /* Place the icons on the left side of the page */
+    z-index: 5; /* Ensure they appear above most elements but below critical UI components */
+}
 
 .icon {
     position: absolute;
-    width: 50px;  /* Very small size */
-    height: 50px; /* Very small size */
-    opacity: 0.5; /* Make icons more transparent */
-    animation: move 5s infinite alternate;
+    width: 80px; /* Adjust the size as needed */
+    height: auto; /* Maintain aspect ratio */
+    opacity: 0.6; /* Makes the icons semi-transparent */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth hover effect */
 }
 
-/* Left Side Icon */
-.icon-left {
-    animation-delay: 0s;
-    position: relative; /* Ensure absolute positioning */
-    left: 5%; /* Position 5% from the left side */
-    top: 20%; /* Random top position */
-    width: 50px;  /* Very small size */
-    height: 50px; /* Very small size */
-    opacity: 0.5; /* Make icons more transparent */
-    animation: move 5s infinite alternate;
+.icon-1 {
+    top: 80%; /* Random vertical position */
+    left: 10px; /* Slightly away from the page edge */
+    animation: float 5s infinite ease-in-out; /* Subtle floating effect */
 }
 
-/* Right Side Icons */
-.icon-right-1 {
-    animation-delay: 1s;
-    position:static; /* Ensure absolute positioning */
-    right: 5%; /* Position 5% from the right side */
-    top: 40%; /* Random top position */
-    width: 50px;
-    height: 40px;
-    opacity: 0.5;
-    animation: move 5s infinite alternate;
+.icon-2 {
+    top: 80%; /* Random vertical position */
+    left: 20px; /* Slightly away from the page edge */
+    animation: float 6s infinite ease-in-out; /* Subtle floating effect */
 }
 
-.icon-right-2 {
-    animation-delay: 2s;
-    position: absolute;
-    right: 5%;
-    top: 70%; /* Random top position */
-    width: 20px;
-    height: 40px;
-    opacity: 0.5;
-    animation: move 5s infinite alternate;
+/* Hover Effect */
+.icon:hover {
+    opacity: 0.8; /* Slightly increase opacity on hover */
+    transform: scale(1.1); /* Grow slightly on hover */
 }
 
-/* Animation for vertical movement */
-@keyframes move {
-    0% {
+/* Floating Animation */
+@keyframes float {
+    0%, 100% {
         transform: translateY(0);
     }
-    100% {
+    50% {
         transform: translateY(-10px);
     }
 }
-/* Glassmorphism Box */
-
-.glassmorphism-box {
-    width: 200px;                /* Adjusted width for the box */
-    height: 50px;                /* Adjusted height for the box */
-    background: rgba(255, 255, 255, 0.05); /* More subtle transparent background */
+/* Glassmorphism button style */
+.scan-button {
+    width: 200px;                /* Width for the button */
+    height: 50px;                /* Height for the button */
+    background: rgba(255, 255, 255, 0.1); /* Transparent background */
     border-radius: 25px;         /* Rounded corners */
     backdrop-filter: blur(15px); /* Slight blur for glass effect */
     -webkit-backdrop-filter: blur(15px); /* Safari compatibility */
-    box-shadow: 0 0 15px 3px rgba(0, 255, 255, 0.7), 0 0 25px 5px rgba(0, 255, 255, 0.5); /* Soft neon glow effect */
-    padding: 10px 20px;          /* Padding inside the box */
-    text-align: center;          /* Center the content inside the box */
-    color: #ffffff;              /* White text */
+    box-shadow: 0 0 8px 2px rgba(0, 255, 255, 0.5), 0 0 12px 3px rgba(0, 255, 255, 0.4); /* Glow effect */
     display: flex;               /* Flexbox for centering content */
     justify-content: center;     /* Center horizontally */
     align-items: center;         /* Center vertically */
-    position: absolute;          /* Position it absolutely */
-    top: 80%;                    /* Position from the top */
-    transform: translateX(-50%); /* Ensure it is centered horizontally */
-    z-index: 10;                 /* Make sure it's on top of other elements */
+    margin-top: 20px;            /* Space above the button */
+    text-decoration: none;       /* Remove underline */
+    color: #ffffff;              /* White text */
+    font-size: 1.2em;            /* Font size for text */
     cursor: pointer;             /* Make it clickable */
-    font-size: 1.2em;            /* Font size for text inside the box */
-    transition: transform 0.4s cubic-bezier(0.215, 0.610, 0.355, 1), 
-                box-shadow 0.3s ease; /* Smooth and dynamic hover effect */
+    text-align: center;          /* Center the text */
+    position: relative;          /* Position relative for placing text inside the box */
 }
 
-.glassmorphism-box:hover {
-    transform: scale(1.1); /* Increase size on hover */
-    box-shadow: 0 0 25px 6px rgba(0, 255, 255, 0.9), 0 0 35px 10px rgba(0, 255, 255, 0.8); /* Stronger glow on hover */
-    background: rgba(255, 255, 255, 0.03); /* Slightly lighter background on hover */
+.scan-button::after {
+    
+    position: absolute;          /* Position absolutely within the button */
+    top: 50%;                    /* Vertically center the text */
+    left: 50%;                   /* Horizontally center the text */
+    transform: translate(-50%, -50%); /* Center it properly */
+    font-size: 1.2em;            /* Font size for the text */
+    color: #ffffff;              /* White color for the text */
+    z-index: 1;                  /* Make sure the text is above the background */
 }
 
-
-
-
+.scan-button:hover {
+    background: rgba(255, 255, 255, 0.1); /* Lighter background on hover */
+    box-shadow: 0 0 15px 5px rgba(0, 255, 255, 0.8); /* Stronger glow effect */
+}
