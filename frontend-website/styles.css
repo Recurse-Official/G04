@@ -1,0 +1,350 @@
+/* General Styles */ 
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    color: #ffffff;
+    background-color: #0f172a; /* Dark blue background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    background-color: transparent; /* Transparent background */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px; /* Horizontal padding */
+}
+
+.navbar-brand {
+    flex-grow: 1; /* Makes the brand move to the left */
+    padding-left: 30px; /* Padding of 30px towards the left side */
+}
+
+.navbar-brand a.dynodroid {
+    text-decoration: none; /* Remove underline */
+    color: #81d4fa; /* Light blue color */
+    font-weight: bold;
+    font-size: 2.5em; /* Increased font size */
+    transition: color 0.3s ease;
+}
+
+.navbar-brand a.dynodroid:hover {
+    color: #ffffff; /* White on hover */
+    text-decoration: none; /* No underline on hover */
+}
+
+.navbar-links {
+    display: flex;
+    justify-content: center; /* Center the links */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1; /* Ensures the links remain centered */
+}
+
+.navbar-links li {
+    margin: 0 20px;
+}
+
+.navbar-links li a {
+    text-decoration: none;
+    color: #cbddf8; /* Light blue for links */
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.navbar-links li a:hover {
+    color: #ffffff; /* White color on hover */
+    text-decoration: none; /* No underline on hover */
+}
+
+/* Background Section */
+.background {
+    width: 100%;
+    height: 80vh;
+    background: url('') no-repeat center center/cover; /* Replace 'background.jpg' with your image path */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #ffffff;
+    padding: 20px;
+}
+
+.background h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.background p {
+    font-size: 1.3em;
+    max-width: 700px;
+}
+/* Bottom-right Image */
+.bottom-right-img {
+    position: fixed; /* Fixes the position relative to the viewport */
+    right: 10px;     /* 10px from the right side of the viewport */
+    bottom: 10px;    /* 10px from the bottom of the viewport */
+    z-index: 1000;   /* Ensure it stays on top of other elements */
+}
+
+.bottom-right-img img {
+    width: 600px;    /* Adjust the width as needed */
+    height: auto;    /* Maintain the aspect ratio */
+}
+
+.bottom-right-img {
+    position: fixed;  /* Fixes the position relative to the viewport */
+    right: 10px;      /* Position the image 10px from the right */
+    bottom: 10px;     /* Position the image 10px from the bottom */
+    z-index: 1000;    /* Ensure the image is above other elements */
+    width: 500px;     /* Adjust the width of the image */
+    height: 500px;    /* Adjust the height of the image */
+    overflow: hidden; /* Hide any overflow */
+    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 70%); 
+    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 70%); /* Safari support */
+}
+
+.bottom-right-img img {
+    width: 100%;      /* Makes the image fill the container */
+    height: 100%;     /* Makes the image fill the container */
+    object-fit: cover; /* Ensures the image fills the container without distortion */
+    opacity: 0.9;     /* Slight opacity for better blending into background */
+}
+
+
+
+
+
+/* Scan Section */
+.scan-section {
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+}
+
+.notification {
+    display: none;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1em;
+}
+
+.notification.success {
+    background-color: #4caf50;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+.dropzone {
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px dashed #94a3b8; /* Light gray-blue */
+    border-radius: 10px;
+    color: #cbd5e1; /* Softer blue for text */
+    cursor: pointer;
+    max-width: 600px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.dropzone:hover {
+    background-color: #1e293b; /* Slightly darker blue */
+    border-color: #38bdf8; /* Light blue hover */
+}
+
+button {
+    background-color: #2563eb; /* Bright blue button */
+    color: #fff;
+    font-size: 1.2em;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #1d4ed8; /* Darker blue hover */
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Loading Spinner */
+.loading {
+    display: none;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #38bdf8; /* Light blue spinner */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Scan Results */
+.results {
+    margin-top: 30px;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .navbar-links {
+        flex-direction: column;
+        margin-top: 10px;
+    }
+
+    .navbar-links li {
+        margin: 10px 0;
+    }
+
+    .background h1 {
+        font-size: 2.5em;
+    }
+
+    .background p {
+        font-size: 1.2em;
+    }
+}
+/* Moving Icons Section */
+.moving-icons {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none; /* Prevent interaction with the icons */
+}
+
+/* Moving Icons Section */
+.moving-icons {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none; /* Prevent interaction with the icons */
+}
+
+.icon {
+    position: absolute;
+    width: 50px;  /* Very small size */
+    height: 50px; /* Very small size */
+    opacity: 0.5; /* Make icons more transparent */
+    animation: move 5s infinite alternate;
+}
+
+/* Left Side Icon */
+.icon-left {
+    animation-delay: 0s;
+    position: relative; /* Ensure absolute positioning */
+    left: 5%; /* Position 5% from the left side */
+    top: 20%; /* Random top position */
+    width: 50px;  /* Very small size */
+    height: 50px; /* Very small size */
+    opacity: 0.5; /* Make icons more transparent */
+    animation: move 5s infinite alternate;
+}
+
+/* Right Side Icons */
+.icon-right-1 {
+    animation-delay: 1s;
+    position:static; /* Ensure absolute positioning */
+    right: 5%; /* Position 5% from the right side */
+    top: 40%; /* Random top position */
+    width: 50px;
+    height: 40px;
+    opacity: 0.5;
+    animation: move 5s infinite alternate;
+}
+
+.icon-right-2 {
+    animation-delay: 2s;
+    position: absolute;
+    right: 5%;
+    top: 70%; /* Random top position */
+    width: 20px;
+    height: 40px;
+    opacity: 0.5;
+    animation: move 5s infinite alternate;
+}
+
+/* Animation for vertical movement */
+@keyframes move {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-10px);
+    }
+}
+/* Glassmorphism Box */
+
+.glassmorphism-box {
+    width: 200px;                /* Adjusted width for the box */
+    height: 50px;                /* Adjusted height for the box */
+    background: rgba(255, 255, 255, 0.05); /* More subtle transparent background */
+    border-radius: 25px;         /* Rounded corners */
+    backdrop-filter: blur(15px); /* Slight blur for glass effect */
+    -webkit-backdrop-filter: blur(15px); /* Safari compatibility */
+    box-shadow: 0 0 15px 3px rgba(0, 255, 255, 0.7), 0 0 25px 5px rgba(0, 255, 255, 0.5); /* Soft neon glow effect */
+    padding: 10px 20px;          /* Padding inside the box */
+    text-align: center;          /* Center the content inside the box */
+    color: #ffffff;              /* White text */
+    display: flex;               /* Flexbox for centering content */
+    justify-content: center;     /* Center horizontally */
+    align-items: center;         /* Center vertically */
+    position: absolute;          /* Position it absolutely */
+    top: 80%;                    /* Position from the top */
+    transform: translateX(-50%); /* Ensure it is centered horizontally */
+    z-index: 10;                 /* Make sure it's on top of other elements */
+    cursor: pointer;             /* Make it clickable */
+    font-size: 1.2em;            /* Font size for text inside the box */
+    transition: transform 0.4s cubic-bezier(0.215, 0.610, 0.355, 1), 
+                box-shadow 0.3s ease; /* Smooth and dynamic hover effect */
+}
+
+.glassmorphism-box:hover {
+    transform: scale(1.1); /* Increase size on hover */
+    box-shadow: 0 0 25px 6px rgba(0, 255, 255, 0.9), 0 0 35px 10px rgba(0, 255, 255, 0.8); /* Stronger glow on hover */
+    background: rgba(255, 255, 255, 0.03); /* Slightly lighter background on hover */
+}
+
+
+
+
