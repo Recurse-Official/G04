@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dynodroid.network.DynoApi
 import com.example.dynodroid.network.MinimalMemoryRequestBody
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +29,8 @@ class DashBoardViewModel : ViewModel() {
     fun scanAndSendApk(appName: String, packageName: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _uploadState.value = UploadState.InProgress("Preparing APK files...")
+                // Update upload stages
+                _uploadState.value = UploadState.InProgress("Collecting APK files...")
                 val apkFiles = getApkFilesForPackage(packageName, context)
 
                 if (apkFiles.isEmpty()) {
@@ -38,6 +40,15 @@ class DashBoardViewModel : ViewModel() {
 
                 var uploadedSize = 0L
                 val totalSize = apkFiles.sumOf { it.length() }
+
+                // Update stages for dynamic analysis
+                val analysisStages = listOf(
+                    "Uploading APK files...",
+                    "Initializing static analysis...",
+                    "Performing network behavior analysis...",
+                    "Scanning for potential security threats...",
+                    "Generating comprehensive report..."
+                )
 
                 apkFiles.forEach { file ->
                     try {
@@ -52,16 +63,39 @@ class DashBoardViewModel : ViewModel() {
                     }
                 }
 
-                _uploadState.value = UploadState.Success("Upload completed for $appName")
+                // Simulate dynamic analysis stages
+                analysisStages.forEach { stage ->
+                    _uploadState.value = UploadState.DynamicAnalysis(stage)
+                    delay(1500) // Simulated processing time
+                }
 
-            } catch (e: PackageManager.NameNotFoundException) {
-                _uploadState.value = UploadState.Failed("Package not found: $packageName")
-            } catch (e: SecurityException) {
-                _uploadState.value = UploadState.Failed("Permission denied")
-            } catch (e: IOException) {
-                _uploadState.value = UploadState.Failed("Network or file error: ${e.message}")
+                // Mock analysis results (replace with actual API call)
+                val mockResults = AnalysisResult(
+                    dangerousPermissions = listOf(
+                        "android.permission.CAMERA",
+                        "android.permission.RECORD_AUDIO"
+                    ),
+                    potentialThreats = listOf(
+                        "Potential data exfiltration",
+                        "Suspicious network connections"
+                    ),
+                    networkActivity = listOf(
+                        "Outbound connection to unknown IP",
+                        "Frequent background data transfer"
+                    ),
+                    staticAnalysisFindings = listOf(
+                        "Obfuscated code detected",
+                        "Potential code injection vulnerability"
+                    )
+                )
+
+                _uploadState.value = UploadState.Success(
+                    "Dynamic analysis completed for $appName",
+                    mockResults
+                )
+
             } catch (e: Exception) {
-                _uploadState.value = UploadState.Failed("Unexpected error: ${e.message}")
+                _uploadState.value = UploadState.Failed("Analysis failed: ${e.message}")
             }
         }
     }

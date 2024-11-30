@@ -10,7 +10,7 @@ import retrofit2.http.Part
 
 interface DynoApiService {
     @Multipart
-    @POST("/federated/receiveApp/")
+    @POST("/api/receiveApp/")
     suspend fun uploadApkChunk(
         @Part chunk: MultipartBody.Part,
         @Part("app_name") appName: RequestBody,
