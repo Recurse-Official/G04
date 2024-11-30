@@ -18,4 +18,11 @@ In this markdown file we are periodically logging the current part of project we
 
 ---
 
+### 2024-11-30 07:48 pm
+- created script to install apk -> get package name -> uninstall apk from the enviroment.
+- working on creating basic android app.
+- working on home page for online tool.
+- Have to work on user stimulation for dynamic analysis
 
+---
+ 
