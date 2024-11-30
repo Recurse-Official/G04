@@ -1,6 +1,6 @@
 # <div align="center">G04 : Algorithm Alchemists</div>
 
----
+<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3VtdGk5MDN2d3EzeTd5a2F1dWRwb3Y3dzQ1czg1dzJhdTkwYW5nZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6fbksneAJLITC/giphy.webp" height=12 width=100%/>
 
 ### Overview
 
@@ -27,7 +27,7 @@ Our system not only identifies harmful behavior but also provides a detailed rep
    - Highlights the **syscalls**, **permissions**, and **intents** contributing to the malicious rating.
    - Provides actionable insights for users to make informed decisions.
 
----
+<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3VtdGk5MDN2d3EzeTd5a2F1dWRwb3Y3dzQ1czg1dzJhdTkwYW5nZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6fbksneAJLITC/giphy.webp" height=12 width=100%/>
 
 ### Workflow
 
