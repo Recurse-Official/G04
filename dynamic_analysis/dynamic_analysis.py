@@ -1,12 +1,6 @@
 import subprocess
 import time
 import os
-import sqlite3
-from datetime import datetime
-import multiprocessing
-import hashlib
-import logging
-import json
 import constants  
 
 
