@@ -33,8 +33,6 @@ class MinimalMemoryRequestBody(
                 sink.write(buffer, 0, bytesRead)
                 sink.flush()
                 bytesRemaining -= bytesRead
-                // Force garbage collection after each write
-                System.gc()
             }
         }
     }

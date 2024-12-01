@@ -265,11 +265,8 @@ fun DashBoard(
                             }
                             is UploadState.Success -> {
                                 TerminalAnalysisResult(
-                                    analysisResult = state.analysisResult
-                                        ?: AnalysisStatusResponse(
-                                            alreadyAnalyzed = false,
-                                            previousResults = AnalysisResult(status = false)
-                                        ),
+                                    analysisResult = state.analysisResult,
+                                    staticAnalysisResult = (state as? UploadState.Success)?.staticAnalysisResult,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .verticalScroll(rememberScrollState())

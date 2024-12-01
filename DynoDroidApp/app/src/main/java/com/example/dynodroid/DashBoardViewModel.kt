@@ -26,9 +26,28 @@ class DashBoardViewModel : ViewModel() {
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
+    private fun scanStatic(packageName: String, context: Context): StaticAnalysisResult {
+        val appScanner = AppScanner(context)
+        val malwarePrediction = appScanner.scanApp(packageName)
+
+        // Extract the raw features used in the scan
+        val rawFeatures = appScanner.getRawFeatures(packageName, context)
+
+        return StaticAnalysisResult(
+            malwarePrediction = malwarePrediction,
+            permissionCount = rawFeatures.getOrNull(1)?.toInt() ?: 0,
+            activityCount = rawFeatures.getOrNull(6)?.toInt() ?: 0,
+            serviceCount = (rawFeatures.getOrNull(8)?.toInt() ?: 0) / 2, // Assuming combined service and receiver count
+            receiverCount = (rawFeatures.getOrNull(8)?.toInt() ?: 0) / 2,
+            providerCount = rawFeatures.getOrNull(3)?.toInt() ?: 0,
+            featureCount = rawFeatures.getOrNull(4)?.toInt() ?: 0,
+            rawFeatures = rawFeatures
+        )
+    }
     fun scanAndSendApk(appName: String, packageName: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                val staticAnalysisResult = scanStatic(packageName, context)
                 _uploadState.value = UploadState.InProgress("Checking analysis status...")
                 val analysisStatus = checkAnalysisStatus(packageName)
 
@@ -36,7 +55,8 @@ class DashBoardViewModel : ViewModel() {
                 if (analysisStatus.alreadyAnalyzed) {
                     _uploadState.value = UploadState.Success(
                         "Analysis already completed for $appName",
-                        analysisStatus
+                        analysisStatus,
+                        staticAnalysisResult
                     )
                     return@launch
                 }
@@ -76,7 +96,8 @@ class DashBoardViewModel : ViewModel() {
                         if (isLastChunk && analysisResult.alreadyAnalyzed) {
                             _uploadState.value = UploadState.Success(
                                 "Dynamic analysis completed for $appName",
-                                analysisResult
+                                analysisResult,
+                                staticAnalysisResult
                             )
                             return@launch
                         }
@@ -122,10 +143,18 @@ class DashBoardViewModel : ViewModel() {
         val totalChunks = (file.length() + chunkSize - 1) / chunkSize
         var lastChunkResult: AnalysisResult? = null
 
+        Log.d("CHUNK_UPLOAD", "Starting upload for file: ${file.name}")
+        Log.d("CHUNK_UPLOAD", "File size: ${file.length()} bytes")
+        Log.d("CHUNK_UPLOAD", "Chunk size: $chunkSize bytes")
+        Log.d("CHUNK_UPLOAD", "Total chunks: $totalChunks")
+
         try {
             for (chunkIndex in 0 until totalChunks) {
                 val startByte = chunkIndex * chunkSize
                 val endByte = min((chunkIndex + 1) * chunkSize, file.length()) - 1
+
+                Log.d("CHUNK_UPLOAD", "Uploading chunk $chunkIndex")
+                Log.d("CHUNK_UPLOAD", "Chunk range: $startByte - $endByte")
 
                 val chunkResult = withContext(Dispatchers.IO) {
                     uploadChunk(
@@ -136,9 +165,11 @@ class DashBoardViewModel : ViewModel() {
                         totalChunks = totalChunks,
                         appName = appName,
                         packageName = packageName,
-                        isLastChunk,
+                        isLastChunk = isLastChunk,
                     )
                 }
+
+                Log.d("CHUNK_UPLOAD", "Chunk $chunkIndex upload result: ${chunkResult.status}")
 
                 // Update progress
                 progressCallback(endByte - startByte + 1)
@@ -149,11 +180,13 @@ class DashBoardViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
+            Log.e("CHUNK_UPLOAD", "Upload failed", e)
             _uploadState.value = UploadState.Failed("Upload failed for chunk: ${e.message}")
             throw e
         }
 
-        // Create and return AnalysisStatusResponse
+        Log.d("CHUNK_UPLOAD", "Upload completed for file: ${file.name}")
+
         return AnalysisStatusResponse(
             alreadyAnalyzed = lastChunkResult?.status == true,
             previousResults = lastChunkResult
@@ -161,20 +194,36 @@ class DashBoardViewModel : ViewModel() {
     }
 
     private fun getApkFilesForPackage(packageName: String, context: Context): List<File> {
-        val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA)
-        val apkFiles = mutableListOf<File>()
+        try {
+            val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA)
+            val apkFiles = mutableListOf<File>()
 
-        packageInfo.applicationInfo?.sourceDir?.let {
-            apkFiles.add(File(it))
-        }
+            Log.d("APK_UPLOAD", "Collecting APK files for package: $packageName")
 
-        packageInfo.applicationInfo?.splitSourceDirs?.let { splitDirs ->
-            splitDirs.forEach { splitPath ->
-                apkFiles.add(File(splitPath))
+            packageInfo.applicationInfo?.sourceDir?.let {
+                val sourceFile = File(it)
+                Log.d("APK_UPLOAD", "Source APK found: ${sourceFile.absolutePath}, Size: ${sourceFile.length()} bytes")
+                apkFiles.add(sourceFile)
             }
-        }
 
-        return apkFiles
+            packageInfo.applicationInfo?.splitSourceDirs?.let { splitDirs ->
+                Log.d("APK_UPLOAD", "Split APKs found: ${splitDirs.size}")
+                splitDirs.forEach { splitPath ->
+                    val splitFile = File(splitPath)
+                    Log.d("APK_UPLOAD", "Split APK: ${splitFile.absolutePath}, Size: ${splitFile.length()} bytes")
+                    apkFiles.add(splitFile)
+                }
+            }
+
+            Log.d("APK_UPLOAD", "Total APK files collected: ${apkFiles.size}")
+            return apkFiles
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e("APK_UPLOAD", "Package not found: $packageName", e)
+            return emptyList()
+        } catch (e: Exception) {
+            Log.e("APK_UPLOAD", "Error collecting APK files", e)
+            return emptyList()
+        }
     }
 
     private suspend fun uploadChunk(

@@ -4,19 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun TerminalAnalysisResult(
     analysisResult: AnalysisStatusResponse,
+    staticAnalysisResult: StaticAnalysisResult?,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -32,7 +36,45 @@ fun TerminalAnalysisResult(
                 fontFamily = FontFamily.Monospace
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Static Analysis Section
+            staticAnalysisResult?.let { staticResult ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Malware Prediction: ${staticResult.malwarePrediction}",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 4.dp)
+                )
+                Text(
+                    text = ">> Static Analysis",
+                    color = Color(0xFF32CD32), // Lime green
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
+                    textAlign = TextAlign.Center 
+                )
+                TerminalSection(
+                    title = "App Components",
+                    items = listOf(
+                        "Permissions: ${staticResult.permissionCount}",
+                        "Activities: ${staticResult.activityCount}",
+                        "Services: ${staticResult.serviceCount}",
+                        "Receivers: ${staticResult.receiverCount}",
+                        "Providers: ${staticResult.providerCount}"
+                    ),
+                    highlightColor = Color(0xFF1E90FF) // Dodger blue
+                )
+            }
+
+            Text(
+                text = ">> Dynamic Analysis",
+                color = Color(0xFF32CD32), // Lime green
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
 
             // Top Syscalls Section
             Text(
