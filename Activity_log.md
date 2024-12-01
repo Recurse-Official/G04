@@ -46,3 +46,10 @@ In this markdown file we are periodically logging the current part of project we
 - working on model creation
 
 --- 
+
+### 2024-12-1 10:30 am 
+- sucessfully extracting apps , performing dynamic & static analysis , model prediction and generating report
+- working on ppt
+- enhancing user interface and user experience
+
+---
