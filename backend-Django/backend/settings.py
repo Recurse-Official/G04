@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-_jgl&r_1%87he)zeu(ben!q7(_k*igyi*v(ytp#6&zvx_a&-dg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['crappie-exact-fully.ngrok-free.app']
 
 
 # Application definition

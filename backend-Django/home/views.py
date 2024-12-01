@@ -18,6 +18,8 @@ import os
 import shutil
 import hashlib
 
+from dynamic_analysis.dynamic_analysis import dyn_analysis;
+from dynamic_analysis.search_db import search_apk_in_database;
 
 @method_decorator(csrf_exempt, name='dispatch')
 class receiveApp(APIView):  
@@ -82,16 +84,6 @@ class receiveApp(APIView):
         return Response({'message': f'Chunk {chunk_index} uploaded successfully'}, status=status.HTTP_200_OK)
 
     @staticmethod
-    def all_chunks_received(chunk_dir, filename, total_chunks):
-        """
-        Check if all chunks have been uploaded by verifying their presence.
-        """
-        for i in range(total_chunks):
-            if not os.path.exists(os.path.join(chunk_dir, f"{filename}_{i}.part")):
-                return False
-        return True
-
-    @staticmethod
     def combine_chunks(chunk_dir, filename, folder, total_chunks):
         """
         Combine all the chunks into a single APK file.
@@ -139,39 +131,47 @@ class receiveApp(APIView):
         # Return the calculated SHA-256 hash in hexadecimal format
         return sha256_hash.hexdigest()
 
+from django.core.files.storage import FileSystemStorage
+from rest_framework.parsers import MultiPartParser, FormParser
+
 @method_decorator(csrf_exempt, name='dispatch')  # For development, use proper CSRF handling in production
 class uploadApp(APIView):
     def post(self, request):
         try:
             chunk = request.FILES.get('chunk')
             app_name = request.POST.get('app_name')
-            package_name = "hello.com.example"
-            chunk_index = 0
-            total_chunks = 1
-            file_name = "home.camera"
+            package_name = request.POST.get('package_name')
+            chunk_index = int(request.POST.get('chunk_index'))
+            total_chunks = int(request.POST.get('total_chunks'))
+            file_name = request.POST.get('file_name')
+
+            answers = search_apk_in_database(package_name)
+
+            if(answers != []):
+                return JsonResponse({
+                    'message': 'Upload complete',
+                    'status': 'success',
+                    'file_path': os.path.join('uploads', package_name, file_name),
+                    'dyn_analysis_data' : answers
+                })
 
             # Create temp directory for chunks
             temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp', package_name)
             os.makedirs(temp_dir, exist_ok=True)
 
             # Save chunk to temp file
-            if total_chunks != 1:
-                chunk_path = os.path.join(temp_dir, f"{file_name}.part{chunk_index}")
-                with open(chunk_path, 'wb+') as destination:
-                    for chunk_data in chunk.chunks():
-                        destination.write(chunk_data)
-
             chunk_path = os.path.join(temp_dir, f"{file_name}.part{chunk_index}")
+            with open(chunk_path, 'wb+') as destination:
+                for chunk_data in chunk.chunks():
+                    destination.write(chunk_data)
 
             # If this is the last chunk, combine all chunks
             if chunk_index == total_chunks - 1:
                 # Create final directory if it doesn't exist
                 final_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', package_name)
                 os.makedirs(final_dir, exist_ok=True)
-                current_dir = os.path.dirname(os.path.abspath(__file__))
-                final_path = os.path.join(current_dir, final_dir, f"{file_name}.apk")
-
-                print(final_path)
+                final_path = os.path.join(final_dir, file_name)
+                final_path = os.path.abspath(final_path)
 
                 # Combine chunks
                 with open(final_path, 'wb') as outfile:
@@ -181,18 +181,25 @@ class uploadApp(APIView):
                             with open(chunk_path, 'rb') as infile:
                                 shutil.copyfileobj(infile, outfile, 1024*1024)  # 1MB buffer
                             os.remove(chunk_path)  # Clean up chunk
-            else:
-                with open(final_path, 'wb') as outfile:
-                    if os.path.exists(chunk_path):
-                            with open(chunk_path, 'rb') as infile:
-                                shutil.copyfileobj(infile, outfile, 1024*1024)  # 1MB buffer
-                            os.remove(chunk_path)  # Clean up chunk
+                
+                # Clean up temp directory
+                try:
+                    shutil.rmtree(temp_dir)
+                except Exception as e:
+                    print(f"Error cleaning temp directory: {e}")
+                print(f"{final_path}")
 
-            return JsonResponse({
-                'message': 'Upload complete',
-                'status': 'success',
-                'file_path': os.path.join('uploads', package_name, file_name)
-            })
+                # List all files in the folder
+                files = [f for f in os.listdir(final_dir) if os.path.isfile(os.path.join(final_dir, f))]
+
+                name = dyn_analysis(final_path, files)
+
+                return JsonResponse({
+                    'message': 'Upload complete',
+                    'status': 'success',
+                    'file_path': os.path.join('uploads', package_name, file_name),
+                    'dyn_analysis_data' : search_apk_in_database(name)
+                })
             
             return JsonResponse({
                 'message': f'Chunk {chunk_index + 1}/{total_chunks} received',
@@ -212,3 +219,13 @@ class uploadApp(APIView):
             'message': 'Method not allowed',
             'status': 'error'
         }, status=405)
+    
+    @staticmethod
+    def all_chunks_received(chunk_dir, filename, total_chunks):
+        """
+        Check if all chunks have been uploaded by verifying their presence.
+        """
+        for i in range(total_chunks):
+            if not os.path.exists(os.path.join(chunk_dir, f"{filename}_{i}.part")):
+                return False
+        return True
