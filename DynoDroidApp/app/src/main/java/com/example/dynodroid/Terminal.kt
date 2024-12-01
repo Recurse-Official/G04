@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TerminalAnalysisResult(
-    analysisResult: AnalysisResult,
+    analysisResult: AnalysisStatusResponse,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -34,29 +34,43 @@ fun TerminalAnalysisResult(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TerminalSection(
-                title = "Dangerous Permissions",
-                items = analysisResult.dangerousPermissions,
-                highlightColor = Color.Red
+            // Top Syscalls Section
+            Text(
+                text = ">> Top Syscalls",
+                color = Color(0xFF6A5ACD), // Slate blue
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
+            analysisResult.previousResults?.topSyscalls?.forEachIndexed { index, syscall ->
+                Text(
+                    text = "${index + 1}. ${syscall[0]} (${syscall[1]} calls)",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 4.dp)
+                )
+            }
 
-            TerminalSection(
-                title = "Potential Threats",
-                items = analysisResult.potentialThreats,
-                highlightColor = Color(0xFFFF6B6B)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            TerminalSection(
-                title = "Network Activity",
-                items = analysisResult.networkActivity,
-                highlightColor = Color(0xFF4ECDC4)
+            // Top RedZone Syscalls Section
+            Text(
+                text = ">> Top RedZone Syscalls",
+                color = Color(0xFFFF4500), // Orange-red
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
-
-            TerminalSection(
-                title = "Static Analysis",
-                items = analysisResult.staticAnalysisFindings,
-                highlightColor = Color(0xFFFFA726)
-            )
+            analysisResult.previousResults?.topRedZonesyscalls?.forEachIndexed { index, syscall ->
+                Text(
+                    text = "${index + 1}. ${syscall[0]} (${syscall[1]} calls)",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 4.dp)
+                )
+            }
         }
     }
 }

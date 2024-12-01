@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -54,9 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -232,15 +229,30 @@ fun DashBoard(
                                 }
                             }
                             is UploadState.InProgress -> {
-                                // Existing progress indicator
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(50.dp)
-                                )
-                                Text(
-                                    text = state.message,
-                                    modifier = Modifier.padding(top = 8.dp)
-                                )
-                            }
+                                val progressMessage = (uploadState as UploadState.InProgress).message
+                                Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(8.dp)
+                                ) {                                Column(
+                                    modifier = Modifier.padding(24.dp)
+                                        .fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally                                ) {                                    CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                                    strokeWidth = 6.dp                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = progressMessage,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.Center                                    )
+                                }                            }                        }
+
                             is UploadState.DynamicAnalysis -> {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(50.dp),
@@ -252,17 +264,19 @@ fun DashBoard(
                                 )
                             }
                             is UploadState.Success -> {
-                                // Terminal-style results
                                 TerminalAnalysisResult(
-                                    analysisResult = state.analysisResults
-                                        ?: AnalysisResult(),
+                                    analysisResult = state.analysisResult
+                                        ?: AnalysisStatusResponse(
+                                            alreadyAnalyzed = false,
+                                            previousResults = AnalysisResult(status = false)
+                                        ),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .verticalScroll(rememberScrollState())
                                 )
                             }
                             is UploadState.Failed -> {
-                                val errorMessage = (uploadState as UploadState.Failed).message
+                                val errorMessage = (uploadState as UploadState.Failed).errorMessage
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -314,14 +328,14 @@ fun DashBoard(
                         modifier = Modifier.weight(1f)
                     ) {
                         items(filteredApps) {
-                            appItemState -> AppItem(
-                                appItemState = appItemState,
-                                isSelected = false,
-                                onSelect = {
-                                    selectedAppIndex = appItemStates.indexOf(appItemState)
-                                    isSearchActive = false
-                                }
-                            )
+                                appItemState -> AppItem(
+                            appItemState = appItemState,
+                            isSelected = false,
+                            onSelect = {
+                                selectedAppIndex = appItemStates.indexOf(appItemState)
+                                isSearchActive = false
+                            }
+                        )
                         }
                     }
                 }
