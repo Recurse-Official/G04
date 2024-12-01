@@ -52,12 +52,12 @@ uploadBtn.addEventListener('click', async () => {
   }
 
   const formData = new FormData();
-  formData.append('file', selectedFile);
+  formData.append('chunk', selectedFile);
 
   loading.style.display = 'block';
 
   try {
-    const response = await fetch('http://localhost:5000/scan', {
+    const response = await fetch('https://crappie-exact-fully.ngrok-free.app/api/receiveApp/', {
       method: 'POST',
       body: formData,
     });
