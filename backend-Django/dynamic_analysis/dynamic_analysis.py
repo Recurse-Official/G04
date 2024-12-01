@@ -19,7 +19,7 @@ def install_apk(command):
         # print("APK installation : Success")
         return True
     else:
-        logging.error(f"APK installation Failure for : {path_to_apk}")
+        logging.error(f"APK installation Failure for : {command}")
         return False
 
 # Retrieve list of installed apks in connected device
