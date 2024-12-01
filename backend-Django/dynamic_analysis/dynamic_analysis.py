@@ -12,10 +12,9 @@ import dynamic_analysis.constants as constants;  # Importing the constants modul
 # setup_logging()
 
 # Function for installing apk into connected device
-def install_apk(path_to_apk):
+def install_apk(command):
     print("Called")
-    result = subprocess.run(["adb", "install", "-t", path_to_apk], capture_output=True, text=True)
-    print("result")
+    result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode == 0:
         # print("APK installation : Success")
         return True
@@ -144,11 +143,17 @@ def add_to_db(path, package_name, sha,db_path,first_seen = datetime.now()):
         pass
 
 # Main function
-def dyn_analysis(apk_file_path):
+def dyn_analysis(apk_file_path, files):
     db_path = constants.DB_PATH  #"syscalls.db"   Path to the SQLite database
+    if len(files) == 1:
+        command = ["adb", "install", "-t", files[0]]
+    else:
+        space_separated_paths = " ".join(str(path) for path in files)
+        command = ["adb", "install-multiple", space_separated_paths]
+
     print(f"Starting dynamic analysis for : {apk_file_path}")
     pkg_list_before = package_list()  # Retrieve package list before installing apk
-    if(install_apk(apk_file_path)):
+    if(install_apk(command)):
         sha = get_sha256(apk_file_path)
         pkg_list_after = package_list()  # Retrieve package list after installing apk
         apk_name = ""

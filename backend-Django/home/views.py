@@ -84,16 +84,6 @@ class receiveApp(APIView):
         return Response({'message': f'Chunk {chunk_index} uploaded successfully'}, status=status.HTTP_200_OK)
 
     @staticmethod
-    def all_chunks_received(chunk_dir, filename, total_chunks):
-        """
-        Check if all chunks have been uploaded by verifying their presence.
-        """
-        for i in range(total_chunks):
-            if not os.path.exists(os.path.join(chunk_dir, f"{filename}_{i}.part")):
-                return False
-        return True
-
-    @staticmethod
     def combine_chunks(chunk_dir, filename, folder, total_chunks):
         """
         Combine all the chunks into a single APK file.
@@ -155,6 +145,16 @@ class uploadApp(APIView):
             total_chunks = int(request.POST.get('total_chunks'))
             file_name = request.POST.get('file_name')
 
+            answers = search_apk_in_database(package_name)
+
+            if(answers != []):
+                return JsonResponse({
+                    'message': 'Upload complete',
+                    'status': 'success',
+                    'file_path': os.path.join('uploads', package_name, file_name),
+                    'dyn_analysis_data' : answers
+                })
+
             # Create temp directory for chunks
             temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp', package_name)
             os.makedirs(temp_dir, exist_ok=True)
@@ -188,19 +188,11 @@ class uploadApp(APIView):
                 except Exception as e:
                     print(f"Error cleaning temp directory: {e}")
                 print(f"{final_path}")
-                
-                if(search_apk_in_database(package_name) != []):
-                    return JsonResponse({
-                        'message': 'Upload complete',
-                        'status': 'success',
-                        'file_path': os.path.join('uploads', package_name, file_name),
-                        'dyn_analysis_data' : search_apk_in_database(name)
-                    })
 
-                # for i in final_dir:
-                #     print(i)
+                # List all files in the folder
+                files = [f for f in os.listdir(final_dir) if os.path.isfile(os.path.join(final_dir, f))]
 
-                name = dyn_analysis(final_path)
+                name = dyn_analysis(final_path, files)
 
                 return JsonResponse({
                     'message': 'Upload complete',
@@ -227,3 +219,13 @@ class uploadApp(APIView):
             'message': 'Method not allowed',
             'status': 'error'
         }, status=405)
+    
+    @staticmethod
+    def all_chunks_received(chunk_dir, filename, total_chunks):
+        """
+        Check if all chunks have been uploaded by verifying their presence.
+        """
+        for i in range(total_chunks):
+            if not os.path.exists(os.path.join(chunk_dir, f"{filename}_{i}.part")):
+                return False
+        return True
