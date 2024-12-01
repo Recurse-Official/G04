@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dynodroid.network.DynoApi
 import com.example.dynodroid.network.MinimalMemoryRequestBody
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,28 +26,76 @@ class DashBoardViewModel : ViewModel() {
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
-
     fun scanAndSendApk(appName: String, packageName: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _uploadState.value = UploadState.InProgress("Preparing APK files...")
+                // Update upload stages
+                _uploadState.value = UploadState.InProgress("Collecting APK files...")
                 val apkFiles = getApkFilesForPackage(packageName, context)
-                if (apkFiles.isNotEmpty()) {
-                    var uploadedSize = 0L
-                    val totalSize = apkFiles.sumOf { it.length() }
-                    apkFiles.forEach { file ->
+
+                if (apkFiles.isEmpty()) {
+                    _uploadState.value = UploadState.Failed("No APK files found for $packageName")
+                    return@launch
+                }
+
+                var uploadedSize = 0L
+                val totalSize = apkFiles.sumOf { it.length() }
+
+                // Update stages for dynamic analysis
+                val analysisStages = listOf(
+                    "Uploading APK files...",
+                    "Initializing static analysis...",
+                    "Performing network behavior analysis...",
+                    "Scanning for potential security threats...",
+                    "Generating comprehensive report..."
+                )
+
+                apkFiles.forEach { file ->
+                    try {
                         uploadLargeApk(file, appName, packageName) { chunkSize ->
                             uploadedSize += chunkSize
                             val progress = ((uploadedSize.toFloat() / totalSize) * 100).toInt()
                             _uploadState.value = UploadState.InProgress("Uploading: $progress%")
                         }
+                    } catch (e: Exception) {
+                        _uploadState.value = UploadState.Failed("Error uploading file: ${e.message}")
+                        throw e
                     }
-                    _uploadState.value = UploadState.Success("Upload completed for $appName")
-                } else {
-                    _uploadState.value = UploadState.Failed("No APK files found for $packageName")
                 }
+
+                // Simulate dynamic analysis stages
+                analysisStages.forEach { stage ->
+                    _uploadState.value = UploadState.DynamicAnalysis(stage)
+                    delay(1500) // Simulated processing time
+                }
+
+                // Mock analysis results (replace with actual API call)
+                val mockResults = AnalysisResult(
+                    dangerousPermissions = listOf(
+                        "android.permission.CAMERA",
+                        "android.permission.RECORD_AUDIO"
+                    ),
+                    potentialThreats = listOf(
+                        "Potential data exfiltration",
+                        "Suspicious network connections"
+                    ),
+                    networkActivity = listOf(
+                        "Outbound connection to unknown IP",
+                        "Frequent background data transfer"
+                    ),
+                    staticAnalysisFindings = listOf(
+                        "Obfuscated code detected",
+                        "Potential code injection vulnerability"
+                    )
+                )
+
+                _uploadState.value = UploadState.Success(
+                    "Dynamic analysis completed for $appName",
+                    mockResults
+                )
+
             } catch (e: Exception) {
-                _uploadState.value = UploadState.Failed("Error: ${e.message}")
+                _uploadState.value = UploadState.Failed("Analysis failed: ${e.message}")
             }
         }
     }
@@ -88,14 +137,14 @@ class DashBoardViewModel : ViewModel() {
         val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA)
         val apkFiles = mutableListOf<File>()
 
-        // Safe call on sourceDir
         packageInfo.applicationInfo?.sourceDir?.let {
             apkFiles.add(File(it))
         }
 
-        // Safe call on splitSourceDirs
-        packageInfo.applicationInfo?.splitSourceDirs?.forEach { splitPath ->
-            apkFiles.add(File(splitPath))
+        packageInfo.applicationInfo?.splitSourceDirs?.let { splitDirs ->
+            splitDirs.forEach { splitPath ->
+                apkFiles.add(File(splitPath))
+            }
         }
 
         return apkFiles
