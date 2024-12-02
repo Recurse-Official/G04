@@ -53,3 +53,5 @@ In this markdown file we are periodically logging the current part of project we
 - enhancing user interface and user experience
 
 ---
+- removed pycache dir from github
+- updated hardcoded paths to relative paths
