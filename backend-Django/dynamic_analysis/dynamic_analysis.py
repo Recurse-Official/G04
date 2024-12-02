@@ -7,7 +7,8 @@ import multiprocessing
 import hashlib
 import logging
 import json
-import dynamic_analysis.constants as constants;  # Importing the constants module
+import dynamic_analysis.constants as constants;
+from user_stimulation  import simulate_user_events# Importing the constants module
 
 # setup_logging()
 
@@ -29,12 +30,11 @@ def package_list():
     return pkg_list
 
 # Perform monkey testing on passed apk, close apk after monkey testing is performed with some added delay
-def monkey_testing(package_name):
-    monkey_command = f"adb shell monkey -p {package_name} -v {constants.MONKEY_EVENTS} --throttle {constants.MONKEY_THROTTLE}"
+def user_testing(package_name):
     
+    simulate_user_events(int = constants.USER_EVENTS)
     # print("Monkey testing and strace: started")
-    monkey_process = subprocess.Popen(monkey_command, stdout=subprocess.DEVNULL, shell=True)
-    time.sleep(constants.MONKEY_DURATION)
+    time.sleep(constants.USER_DURATION)
     close_apk(package_name)
     time.sleep(5)
 
@@ -146,16 +146,18 @@ def add_to_db(path, package_name, sha,db_path,first_seen = datetime.now()):
 def dyn_analysis(apk_file_path, files):
     db_path = constants.DB_PATH  #"syscalls.db"   Path to the SQLite database
     if len(files) == 1:
-        command = ["adb", "install", "-t", files[0]]
+        command = ["adb", "install","-t", apk_file_path]
     else:
         space_separated_paths = " ".join(str(path) for path in files)
         command = ["adb", "install-multiple", space_separated_paths]
 
+    print(command)
+
     print(f"Starting dynamic analysis for : {apk_file_path}")
     pkg_list_before = package_list()  # Retrieve package list before installing apk
-    if(install_apk(command)):
-        sha = get_sha256(apk_file_path)
+    if(install_apk(command=command)):
         pkg_list_after = package_list()  # Retrieve package list after installing apk
+        sha = get_sha256(apk_file_path)
         apk_name = ""
         for i in pkg_list_after:
             if i not in pkg_list_before:
@@ -220,3 +222,4 @@ if __name__ == "__main__":
         subprocess.run(["adb","emu","kill"])
         time.sleep(20)
         subprocess.run(['adb','kill-server'])
+
